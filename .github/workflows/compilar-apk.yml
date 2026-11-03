@@ -1,7 +1,10 @@
 name: Compilar APK
 on:
   push:
+    branches: [main]
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,7 +16,16 @@ jobs:
           java-version: '17'
       - uses: gradle/actions/setup-gradle@v4
       - run: chmod +x gradlew && ./gradlew assembleDebug
+      - run: cp app/build/outputs/apk/debug/app-debug.apk MiDiaYMiPlata.apk
       - uses: actions/upload-artifact@v4
         with:
           name: MiDiaYMiPlata-apk
-          path: app/build/outputs/apk/debug/*.apk
+          path: MiDiaYMiPlata.apk
+      - name: Publicar descarga directa
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0-build${{ github.run_number }}
+          name: Mi Día y Mi Plata (versión ${{ github.run_number }})
+          body: Descarga **MiDiaYMiPlata.apk** desde tu Samsung e instálalo.
+          make_latest: true
+          files: MiDiaYMiPlata.apk
